@@ -2853,12 +2853,12 @@ static int cryptfs_enable_inplace_f2fs(char *crypto_blkdev,
     data.crypto_blkdev = crypto_blkdev;
     data.realfd = -1;
     data.cryptofd = -1;
-    if ( (data.realfd = open64(real_blkdev, O_RDWR|O_CLOEXEC)) < 0) {
+    if ( (data.realfd = open(real_blkdev, O_RDWR|O_CLOEXEC)) < 0) {
         SLOGE("Error opening real_blkdev %s for f2fs inplace encrypt\n",
               real_blkdev);
         goto errout;
     }
-    if ( (data.cryptofd = open64(crypto_blkdev, O_WRONLY|O_CLOEXEC)) < 0) {
+    if ( (data.cryptofd = open(crypto_blkdev, O_WRONLY|O_CLOEXEC)) < 0) {
         SLOGE("Error opening crypto_blkdev %s for f2fs inplace encrypt. err=%d(%s)\n",
               crypto_blkdev, errno, strerror(errno));
         rc = ENABLE_INPLACE_ERR_DEV;
