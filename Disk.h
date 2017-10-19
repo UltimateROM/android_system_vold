@@ -109,8 +109,6 @@ protected:
     bool mCreated;
     /* Flag that we just partitioned and should format all volumes */
     bool mJustPartitioned;
-    /* Flag that we need to skip first disk change events after partitioning*/
-    bool mSkipChange;
 
     void createPublicVolume(dev_t device,
                     const std::string& fstype = "",
