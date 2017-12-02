@@ -376,6 +376,8 @@ status_t Disk::readPartitions() {
                 }
             }
         }
+
+        if (foundParts) break;
     }
 
     // Ugly last ditch effort, treat entire disk as partition
