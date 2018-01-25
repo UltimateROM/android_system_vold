@@ -51,7 +51,8 @@ using android::vold::KeyBuffer;
 
 static const std::string kDmNameUserdata = "userdata";
 
-static bool mount_via_fs_mgr(const char* mount_point, const char* blk_device) {
+static bool mount_via_fs_mgr(const char* /*mount_point*/, const char* /*blk_device*/) {
+#if 0
     // fs_mgr_do_mount runs fsck. Use setexeccon to run trusted
     // partitions in the fsck domain.
     if (setexeccon(secontextFsck())) {
@@ -69,10 +70,12 @@ static bool mount_via_fs_mgr(const char* mount_point, const char* blk_device) {
         return false;
     }
     LOG(DEBUG) << "Mounted " << mount_point;
+#endif
     return true;
 }
 
-static bool read_key(bool create_if_absent, KeyBuffer* key) {
+static bool read_key(bool /*create_if_absent*/, KeyBuffer* /*key*/) {
+#if 0
     auto data_rec = fs_mgr_get_crypt_entry(fstab);
     if (!data_rec) {
         LOG(ERROR) << "Failed to get data_rec";
@@ -94,6 +97,7 @@ static bool read_key(bool create_if_absent, KeyBuffer* key) {
     auto dir = key_dir + "/key";
     auto temp = key_dir + "/tmp";
     if (!android::vold::retrieveKey(create_if_absent, dir, temp, key)) return false;
+#endif
     return true;
 }
 
@@ -126,8 +130,9 @@ static bool get_number_of_sectors(const std::string& real_blkdev, uint64_t *nr_s
     return true;
 }
 
-static struct dm_ioctl* dm_ioctl_init(char *buffer, size_t buffer_size,
-                                      const std::string& dm_name) {
+static struct dm_ioctl* dm_ioctl_init(char */*buffer*/, size_t /*buffer_size*/,
+                                      const std::string& /*dm_name*/) {
+#if 0
     if (buffer_size < sizeof(dm_ioctl)) {
         LOG(ERROR) << "dm_ioctl buffer too small";
         return nullptr;
@@ -143,11 +148,14 @@ static struct dm_ioctl* dm_ioctl_init(char *buffer, size_t buffer_size,
     io->flags = 0;
     dm_name.copy(io->name, sizeof(io->name));
     return io;
+#endif
+    return NULL;
 }
 
-static bool create_crypto_blk_dev(const std::string& dm_name, uint64_t nr_sec,
-                                  const std::string& target_type, const KeyBuffer& crypt_params,
-                                  std::string* crypto_blkdev) {
+static bool create_crypto_blk_dev(const std::string& /*dm_name*/, uint64_t /*nr_sec*/,
+                                  const std::string& /*target_type*/, const KeyBuffer& /*crypt_params*/,
+                                  std::string* /*crypto_blkdev*/) {
+#if 0
     android::base::unique_fd dm_fd(TEMP_FAILURE_RETRY(open(
         "/dev/device-mapper", O_RDWR | O_CLOEXEC, 0)));
     if (dm_fd == -1) {
@@ -209,12 +217,14 @@ static bool create_crypto_blk_dev(const std::string& dm_name, uint64_t nr_sec,
         PLOG(ERROR) << "Cannot resume dm-crypt device " << dm_name;
         return false;
     }
+#endif
     return true;
 }
 
 #define DATA_PREP_TIMEOUT 1000
 static bool prep_data_fs(void)
 {
+#if 0
     // NOTE: post_fs_data results in init calling back around to vold, so all
     // callers to this method must be async
 
@@ -238,18 +248,23 @@ static bool prep_data_fs(void)
         }
         usleep(50000);
     }
+#endif
+    return true;
 }
 
 static void async_kick_off() {
+#if 0
     LOG(DEBUG) << "Asynchronously restarting framework";
     sleep(2); // TODO: this mirrors cryptfs, but can it be made shorter?
     property_set("vold.decrypt", "trigger_load_persist_props");
     if (!prep_data_fs()) return;
     /* startup service classes main and late_start */
     property_set("vold.decrypt", "trigger_restart_framework");
+#endif
 }
 
 bool e4crypt_mount_metadata_encrypted() {
+#if 0
     LOG(DEBUG) << "e4crypt_mount_default_encrypted";
     KeyBuffer key;
     if (!read_key(false, &key)) return false;
@@ -268,10 +283,12 @@ bool e4crypt_mount_metadata_encrypted() {
     LOG(DEBUG) << "Restarting filesystem for metadata encryption";
     mount_via_fs_mgr(data_rec->mount_point, crypto_blkdev.c_str());
     std::thread(&async_kick_off).detach();
+#endif
     return true;
 }
 
 bool e4crypt_enable_crypto() {
+#if 0
     LOG(DEBUG) << "e4crypt_enable_crypto";
     char encrypted_state[PROPERTY_VALUE_MAX];
     property_get("ro.crypto.state", encrypted_state, "");
@@ -315,5 +332,6 @@ bool e4crypt_enable_crypto() {
     mount_via_fs_mgr(data_rec->mount_point, crypto_blkdev.c_str());
     property_set("vold.decrypt", "trigger_reset_main");
     std::thread(&async_kick_off).detach();
+#endif
     return true;
 }
