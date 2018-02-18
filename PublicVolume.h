@@ -44,6 +44,7 @@ public:
     virtual ~PublicVolume();
 
 protected:
+    unsigned long mId;
     status_t doCreate() override;
     status_t doDestroy() override;
     status_t doMount() override;

@@ -49,6 +49,9 @@ static const char* kFusePath = "/system/bin/sdcard";
 
 static const char* kAsecPath = "/mnt/secure/asec";
 
+static unsigned long count = 0;
+//static std::string volumes;
+
 PublicVolume::PublicVolume(dev_t device, const std::string& nickname,
                 const std::string& fstype /* = "" */,
                 const std::string& mntopts /* = "" */) :
@@ -56,6 +59,16 @@ PublicVolume::PublicVolume(dev_t device, const std::string& nickname,
         mFsType(fstype), mFsLabel(nickname), mMntOpts(mntopts) {
     setId(StringPrintf("public:%u_%u", major(device), minor(device)));
     mDevPath = StringPrintf("/dev/block/vold/%s", getId().c_str());
+    PLOG(INFO) << "id: " << getId() << " fs_type: " << mFsType;
+
+    mId = count++;
+/*
+    if (volumes.find(getId()) == std::string::npos) {
+        mId = count++;
+        volumes.append(getId());
+    }
+
+    PLOG(INFO) << "volumes: " << volumes;*/
 }
 
 PublicVolume::~PublicVolume() {
@@ -97,6 +110,7 @@ status_t PublicVolume::doCreate() {
     if (mFsLabel.size() > 0) {
         notifyEvent(ResponseCode::VolumeFsLabelChanged, mFsLabel);
     }
+
     return CreateDeviceNode(mDevPath, mDevice);
 }
 
@@ -115,10 +129,15 @@ status_t PublicVolume::doMount() {
 
     // Use volume label and otherwise UUID as stable name, if available
     std::string stableName = getId();
-    if (!mFsLabel.empty()) {
-        stableName = mFsLabel;
-    } else if (!mFsUuid.empty()) {
-        stableName = mFsUuid;
+
+    if (mId > 1)
+       stableName = StringPrintf("sdcard%d", (mId - 2));
+    else {
+         if (!mFsLabel.empty()) {
+             stableName = mFsLabel;
+         } else if (!mFsUuid.empty()) {
+             stableName = mFsUuid;
+         }
     }
 
 #ifdef MINIVOLD
