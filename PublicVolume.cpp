@@ -183,7 +183,7 @@ status_t PublicVolume::doMount() {
         ret = ::mount(mDevPath.c_str(), mRawPath.c_str(), mFsType.c_str(), 0, NULL);
     }
     if (ret) {
-        PLOG(ERROR) << getId() << " failed to mount " << mDevPath;
+        PLOG(ERROR) << getId() << " failed to mount mDevPath = " << mDevPath << " mRawPath = " << mRawPath << " mFsType = " << mFsType;
         return -EIO;
     }
 
